@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd">
+    <apikit:config name="loan-api-config" api="resource::096484fd-dcfd-4f60-9f58-aecc0e2e110f:loan-api:1.0.0:raml:zip:loan-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <snowflake:snowflake-config name="Snowflake_Config" doc:name="Snowflake Config" doc:id="c51f3857-c44f-475c-847a-311eb9198e73" >
+		<snowflake:snowflake-connection accountName="qx97306.ap-southeast-1" warehouse="COMPUTE_WH" database="LOAN_APPILICATION" schema="PUBLIC" user="MyCreditUnion" password="Deloitte@123" role="ACCOUNTADMIN" />
+	</snowflake:snowflake-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="12ccba4f-258d-403d-872b-88090f2386f2" >
+		<http:listener-connection host="localhost" port="8080" />
+	</http:listener-config>
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="7d4786aa-60e5-426a-bcb3-35d509178805" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<flow name="loan-api-main">
+        <http:listener config-ref="HTTP_Listener_config1" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="loan-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="loan-api-console">
+        <http:listener config-ref="HTTP_Listener_config" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="loan-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\cibil-score\(UserId):loan-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="UserId">attributes.uriParams.'UserId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <snowflake:select doc:name="Select" doc:id="7d67b89b-203c-430b-a773-4a8960821be7" config-ref="Snowflake_Config">
+			<snowflake:sql><![CDATA[select * from "LOAN_APPLICATION"."PUBLIC"."CIBIL"
+where USERID = :UserId]]></snowflake:sql>
+			<snowflake:input-parameters><![CDATA[#[{
+	UserId : attributes.uriParams.UserId as Number
+}]]]></snowflake:input-parameters>
+		</snowflake:select>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  PanCard: payload.PANCARD[0],
+  Score: payload.SCORE[0]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\customer-loan-details\(UserId):loan-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="UserId">attributes.uriParams.'UserId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<snowflake:select doc:name="Select" doc:id="dc0994a3-7ca8-4504-ae6c-65cfd839ee7a" config-ref="Snowflake_Config">
+			<snowflake:sql ><![CDATA[select * from "LOAN_APPLICATION"."PUBLIC"."LOAN_DETAIL"
+where USERID = :UserId
+limit 1]]></snowflake:sql>
+			<snowflake:input-parameters ><![CDATA[#[{
+	UserId: attributes.uriParams.UserId as Number
+}]]]></snowflake:input-parameters>
+		</snowflake:select>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  loan_id: payload.LOAN_ID[0],
+  user_id: payload.USERID[0],
+  email: payload.EMAIL[0],
+  amount: payload.LOAN_AMOUNT[0],
+  tenure: payload.TENURE[0],
+  interest: payload.INTERSET[0],
+  "type": payload.TYPE[0]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\loan-status:application\json:loan-api-config">
+		<snowflake:insert doc:name="Insert" doc:id="76ada354-c612-4181-885d-adf73a0a2081" config-ref="Snowflake_Config">
+			<snowflake:sql ><![CDATA[insert into "LOAN_APPLICATION"."PUBLIC"."LOAN_STATUS"(LOANID, USERID, STATUS, REASON, AMOUNT) values (:user_id, :loan_id, :status, :amount, :reason)]]></snowflake:sql>
+			<snowflake:input-parameters ><![CDATA[#[{
+	loan_id: payload.loan_id,
+	user_id: payload.user_id,
+	status: payload.status,
+	amount: payload.amount,
+	reason: payload.reason
+}]]]></snowflake:input-parameters>
+		</snowflake:insert>
+		<snowflake:select doc:name="Select" doc:id="8fa16fbd-5675-46cc-9ebb-33ceb33abfc9" config-ref="Snowflake_Config">
+			<snowflake:sql ><![CDATA[select * from "LOAN_APPLICATION"."PUBLIC"."LOAN_STATUS"]]></snowflake:sql>
+		</snowflake:select>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  loan_id: payload.LOAN_ID[0],
+  user_id: payload.USERID[0],
+  status: payload.STATUS[0],
+  reason: payload.REASON[0],
+  amount: payload.AMOUNT[0]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>
