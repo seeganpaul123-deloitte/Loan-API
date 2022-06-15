@@ -13,4 +13,5 @@ http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mul
 	</snowflake:snowflake-config>
 	<configuration-properties doc:name="Configuration properties" doc:id="87c4a78c-77bc-4fc2-858e-9a522372cbde" file="sql-queries\select-cibil-score.properties" />
 	<configuration-properties doc:name="Configuration properties" doc:id="8cde0924-46ab-416b-9092-4850058fc0d4" file="sql-queries\select-customer-loan-details.properties" />
+	<configuration-properties doc:name="Configuration properties" doc:id="458d696a-a1d9-4bcb-9554-d689dd859c07" file="sql-queries\insert-loan-status.properties" />
 </mule>

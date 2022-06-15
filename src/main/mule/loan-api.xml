@@ -128,32 +128,6 @@ output application/json
         <flow-ref doc:name="get-customer-loan-details" doc:id="2cf1842c-fbba-44c0-9a9b-0a97cbbab325" name="get-customer-loan-details"/>
     </flow>
     <flow name="post:\loan-status:application\json:loan-api-config">
-		<snowflake:insert doc:name="Insert" doc:id="76ada354-c612-4181-885d-adf73a0a2081" config-ref="main_snowflake-connector">
-			<snowflake:sql ><![CDATA[insert into "LOAN_APPLICATION"."PUBLIC"."LOAN_STATUS"(LOAN_ID, USERID, STATUS, REASON, AMOUNT) values (:user_id, :loan_id, :status, :reason, :amount)]]></snowflake:sql>
-			<snowflake:input-parameters ><![CDATA[#[{
-	loan_id: payload.loan_id ,
-	user_id: payload.user_id,
-	status: payload.status,
-	amount: payload.amount,
-	reason: payload.reason
-}]]]></snowflake:input-parameters>
-		</snowflake:insert>
-		<snowflake:select doc:name="Select" doc:id="8fa16fbd-5675-46cc-9ebb-33ceb33abfc9" config-ref="main_snowflake-connector">
-			<snowflake:sql ><![CDATA[select * from "LOAN_APPLICATION"."PUBLIC"."LOAN_STATUS"]]></snowflake:sql>
-		</snowflake:select>
-		<ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  loan_id: payload.LOAN_ID[0],
-  user_id: payload.USERID[0],
-  status: payload.STATUS[0],
-  reason: payload.REASON[0],
-  amount: payload.AMOUNT[0]
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<flow-ref doc:name="update-loan-status" doc:id="e4628a91-7187-4bf2-bc2b-dfe848719667" name="post-loan-status"/>
     </flow>
 </mule>

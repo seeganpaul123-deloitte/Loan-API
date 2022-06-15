@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd">
+	<flow name="post-loan-status" doc:id="a11af9be-805e-41aa-a3d1-639581edb167" >
+		<ee:transform doc:name="Transform Message" doc:id="70edd74c-6017-47ba-949a-52a59a8ec828" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	loan_id: payload.loan_id ,
+	user_id: payload.user_id,
+	status: payload.status,
+	amount: payload.amount,
+	reason: payload.reason
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload.user_id]" doc:name="userId" doc:id="e73c40fd-81f6-4464-993a-50e300dba4c8" variableName="UserId"/>
+		<snowflake:insert doc:name="Insert" doc:id="74fec8b7-da38-4354-9672-ab9ff188bec3" config-ref="main_snowflake-connector">
+			<snowflake:sql ><![CDATA[${loan-status.query}]]></snowflake:sql>
+			<snowflake:input-parameters ><![CDATA[#[{
+	loan_id: payload.loan_id ,
+	user_id: payload.user_id,
+	status: payload.status,
+	amount: payload.amount,
+	reason: payload.reason
+}]]]></snowflake:input-parameters>
+		</snowflake:insert>
+		<snowflake:select doc:name="Select" doc:id="3ec677b6-dc77-4598-ba28-c64259d1cd02" config-ref="main_snowflake-connector">
+			<snowflake:sql ><![CDATA[${select-loan-status.query}]]></snowflake:sql>
+			<snowflake:input-parameters ><![CDATA[#[{
+	UserId: vars.UserId
+}]]]></snowflake:input-parameters>
+		</snowflake:select>
+		<ee:transform doc:name="Transform Message" doc:id="0f9c88c0-88d3-4736-8ba2-8b41fc0affd7" >
+			<ee:message >
+				<ee:set-payload resource="p-insert-loan-status.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
