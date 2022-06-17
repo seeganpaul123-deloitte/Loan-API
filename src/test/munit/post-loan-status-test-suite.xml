@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="post-loan-status-test-suite.xml" />
+	<munit:test name="post-loan-status-test-suite-post-loan-statusTest" doc:id="e54690e8-a979-43b1-87d8-5711a614f7e5" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post-loan-status" doc:id="e2b05199-15dd-4a8a-b3f4-3168ed389c96" name="post-loan-status"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="bf5ba73b-0096-40e8-8e14-9e4bc25d18f2" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<flow name="post-loan-status-test-suiteFlow" doc:id="e07a0930-819c-44c2-ada7-8ac93d2f84fc" >
+		<munit-tools:mock-when doc:name="Mock when" doc:id="811d88e7-de94-4c7e-b9bb-69468783195c" processor="snowflake:insert">
+			<munit-tools:with-attributes >
+				<munit-tools:with-attribute whereValue="74fec8b7-da38-4354-9672-ab9ff188bec3" attributeName="doc:id" />
+			</munit-tools:with-attributes>
+		</munit-tools:mock-when>
+	</flow>
+	<flow name="post-loan-status-test-suiteFlow1" doc:id="4a386649-8175-4d16-b79c-9bc8d8b57a8f" >
+		<munit-tools:mock-when doc:name="Mock when" doc:id="7e148804-ddcd-49b1-abe7-ca878db8a510" processor="snowflake:select">
+			<munit-tools:with-attributes >
+				<munit-tools:with-attribute whereValue="3ec677b6-dc77-4598-ba28-c64259d1cd02" attributeName="doc:id" />
+			</munit-tools:with-attributes>
+		</munit-tools:mock-when>
+	</flow>
+
+
+</mule>
