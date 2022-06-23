@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:listener-config name="main_http-listener" doc:name="HTTP Listener config" doc:id="3bce6a46-bbbd-44c8-b75b-4079f24e59a3" >
+		<http:listener-connection host="localhost" port="8083"/>
+	</http:listener-config>
+	<snowflake:snowflake-config name="main_snowflake-connector" doc:name="Snowflake Config" doc:id="982ad9e5-7c80-4e72-9ec2-8bd413423808" >
+		<snowflake:snowflake-connection accountName="${secure::db.Account Name}" warehouse="${secure::db.Warehouse}" database="${secure::db.Database}" schema="${secure::db.Schema}" user="${secure::db.User}" password="${secure::db.Password}" role="ACCOUNTADMIN" />
+	</snowflake:snowflake-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="87c4a78c-77bc-4fc2-858e-9a522372cbde" file="sql-queries\select-cibil-score.properties" />
+	<configuration-properties doc:name="Configuration properties" doc:id="8cde0924-46ab-416b-9092-4850058fc0d4" file="sql-queries\select-customer-loan-details.properties" />
+	<configuration-properties doc:name="Configuration properties" doc:id="458d696a-a1d9-4bcb-9554-d689dd859c07" file="sql-queries\insert-loan-status.properties" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="d5d8db20-b53b-4a8c-81b8-8983d5820493" file="Properties.yaml" key="teamproject" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+</mule>
