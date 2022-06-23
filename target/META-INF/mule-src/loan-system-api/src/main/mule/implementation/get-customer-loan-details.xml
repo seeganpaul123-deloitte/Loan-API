@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd">
+	<flow name="get-customer-loan-details" doc:id="9d78e18e-f794-42b8-b3b8-2165f6df702b" >
+		<ee:transform doc:name="Transform Message" doc:id="bb158c76-e001-46ca-b539-952c55db0155" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<snowflake:select doc:name="Select" doc:id="0172a421-e04f-4b44-8285-40d55e9f7a09" config-ref="main_snowflake-connector">
+			<snowflake:sql ><![CDATA[${customerLoan.query}]]></snowflake:sql>
+			<snowflake:input-parameters ><![CDATA[#[{
+	UserId: attributes.uriParams.UserId as Number
+}]]]></snowflake:input-parameters>
+		</snowflake:select>
+		<ee:transform doc:name="Transform Message" doc:id="6c9caf1d-7ab8-4e9e-86d1-74dee896e369" >
+			<ee:message >
+				<ee:set-payload  resource="p-customer-loan-details.dwl"></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
