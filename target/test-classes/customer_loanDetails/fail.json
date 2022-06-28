@@ -1,0 +1,11 @@
+[
+    {
+    	"LOAN_ID": null,
+        "USERID": null,
+        "EMAIL": null,
+        "LOAN_AMOUNT": null,
+        "TENURE": null,
+        "INTERSET": null,
+        "TYPE":null
+    }
+]

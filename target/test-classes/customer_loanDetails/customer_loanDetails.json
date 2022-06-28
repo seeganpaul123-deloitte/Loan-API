@@ -1,0 +1,11 @@
+[
+    {
+    	"LOAN_ID": 1,
+        "USERID": 16,
+        "EMAIL": "preran@gmail.com",
+        "LOAN_AMOUNT": 25000,
+        "TENURE": 24,
+        "INTERSET": 10,
+        "TYPE":"Personal"
+    }
+]
