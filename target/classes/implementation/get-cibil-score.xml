@@ -6,10 +6,10 @@
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd">
 	<flow name="get-cibil-score" doc:id="2c906355-4a8e-4e94-93cd-3e714997deb4" >
-		<ee:transform doc:name="Transform Message" doc:id="06e28fc7-6992-49df-92aa-3817baad6332" >
+		<ee:transform doc:name="Transform Message" doc:id="5e9f1e5e-d4f0-4a41-a23c-0b48082e54bd" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 {
 }]]></ee:set-payload>
@@ -21,10 +21,17 @@ output application/java
 	UserId : attributes.uriParams.UserId as Number
 }]]]></snowflake:input-parameters>
 		</snowflake:select>
-		<ee:transform doc:name="Transform Message" doc:id="bec46d9b-4e48-466c-a6f8-7fe34be14b59">
+		<choice doc:name="Choice" doc:id="a14e1641-8c14-4b70-91ad-f75c36ac1608" >
+			<when expression="#[payload[0].SCORE == null]">
+				<raise-error doc:name="Raise error" doc:id="77aa3b7c-40ac-4307-a698-0ff51c88744d" type="CIBIL:NOT_FOUND" description="cibil score for user is not found or user is not registered"/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="bec46d9b-4e48-466c-a6f8-7fe34be14b59">
 			<ee:message>
 				<ee:set-payload resource="p-cibil-score.dwl"></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+			</otherwise>
+		</choice>
 	</flow>
 </mule>

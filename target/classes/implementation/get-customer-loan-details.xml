@@ -21,10 +21,17 @@ output application/java
 	UserId: attributes.uriParams.UserId as Number
 }]]]></snowflake:input-parameters>
 		</snowflake:select>
-		<ee:transform doc:name="Transform Message" doc:id="6c9caf1d-7ab8-4e9e-86d1-74dee896e369" >
-			<ee:message >
-				<ee:set-payload  resource="p-customer-loan-details.dwl"></ee:set-payload>
+		<choice doc:name="Choice" doc:id="c3276060-376c-49c7-b6ab-2e55f7014795" >
+			<when expression="#[payload[0].LOAN_ID == null]">
+				<raise-error doc:name="Raise error" doc:id="02fed449-f180-481d-9154-3b47db5d412e" type="LOAN:NOT_FOUND" description="customer loan details is not present or customer is not registered" />
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="6c9caf1d-7ab8-4e9e-86d1-74dee896e369">
+			<ee:message>
+				<ee:set-payload resource="p-customer-loan-details.dwl"></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+			</otherwise>
+		</choice>
 	</flow>
 </mule>
